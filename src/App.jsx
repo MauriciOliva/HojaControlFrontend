@@ -8,17 +8,8 @@ import { InformeEquipo } from './Informe/InformeEquipo';
 import { Firmas } from './Informe/Firmas';
 
 const FormatoControlVisita = () => {
-
   // Estados para reporte técnico
   const [reporteTecnico, setReporteTecnico] = useState('');
-  
-
-  // Manejar cambios en equipos
-  const handleEquipoChange = (index, field, value) => {
-      const newEquipos = [...equipos];
-      newEquipos[index] = { ...newEquipos[index], [field]: value };
-      setEquipos(newEquipos);
-  };
 
   // Función para agregar más filas de equipos
   const agregarEquipo = () => {
@@ -117,190 +108,70 @@ const FormatoControlVisita = () => {
     return true;
   };
 
-  // Función para generar Excel localmente
+  // Función para generar Excel desde plantilla certificada
   const generarExcelLocalmente = async () => {
     try {
-      // Crear un nuevo workbook
+      // Cargar la plantilla
+      const response = await fetch('./Plantilla.xlsx');
+      const arrayBuffer = await response.arrayBuffer();
       const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet('Formato de Visita');
-
-      // Estilos
-      const headerStyle = {
-        font: { bold: true, color: { argb: 'FFFFFFFF' } },
-        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0070C0' } },
-        alignment: { vertical: 'middle', horizontal: 'center' }
-      };
-
-      const titleStyle = {
-        font: { bold: true, size: 16 },
-        alignment: { vertical: 'middle', horizontal: 'center' }
-      };
-
-      const subheaderStyle = {
-        font: { bold: true },
-        fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDDEBF7' } }
-      };
-
-      // Título
-      worksheet.mergeCells('A1:G2');
-      worksheet.getCell('A1').value = 'FORMATO DE CONTROL DE VISITA Y ACTA DE ENTREGA DE SERVICIO';
-      worksheet.getCell('A1').style = titleStyle;
-
-      // Información de la visita
-      worksheet.mergeCells('A4:B4');
-      worksheet.getCell('A4').value = 'INFORMACIÓN DE LA VISITA';
-      worksheet.getCell('A4').style = subheaderStyle;
-
-      const infoVisitaRows = [
-        ['SID-TT', datosVisita.sidTT],
-        ['CIUDAD', datosVisita.ciudad],
-        ['FECHA DE VISITA', datosVisita.fechaVisita],
-        ['CONTRATISTA', datosVisita.contratista],
-        ['HORA ENTRADA', datosVisita.horaEntrada],
-        ['HORA SALIDA', datosVisita.horaSalida]
-      ];
-
-      infoVisitaRows.forEach((row, idx) => {
-        worksheet.getCell(`A${5 + idx}`).value = row[0];
-        worksheet.getCell(`B${5 + idx}`).value = row[1];
-      });
-
-      // Información del cliente
-      worksheet.mergeCells('D4:E4');
-      worksheet.getCell('D4').value = 'INFORMACIÓN DEL CLIENTE';
-      worksheet.getCell('D4').style = subheaderStyle;
-
-      const infoClienteRows = [
-        ['NOMBRE', datosCliente.nombre],
-        ['SEDE', datosCliente.sede],
-        ['DIRECCIÓN', datosCliente.direccion],
-        ['TELÉFONO', datosCliente.telefono],
-        ['CONTACTO', datosCliente.contacto]
-      ];
-
-      infoClienteRows.forEach((row, idx) => {
-        worksheet.getCell(`D${5 + idx}`).value = row[0];
-        worksheet.getCell(`E${5 + idx}`).value = row[1];
-      });
-
-      // Equipos
-      worksheet.mergeCells('A12:G12');
-      worksheet.getCell('A12').value = 'INFORMACIÓN SOBRE EQUIPOS';
-      worksheet.getCell('A12').style = subheaderStyle;
-
-      // Encabezados de la tabla de equipos
-      const equipoHeaders = ['No', 'Placa', 'Serial', 'Marca', 'Estado', 'Descripción del Daño', 'Instalado/Retirado'];
-      worksheet.getRow(13).values = equipoHeaders;
-      worksheet.getRow(13).eachCell((cell) => {
-        cell.style = headerStyle;
-        cell.border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' }
-        };
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      });
-
-      // Mostrar todos los equipos, aunque estén vacíos
-      // Escribir los equipos en filas fijas para evitar que se desplacen
-      let equipoStartRow = 14;
-      equipos.forEach((equipo, idx) => {
-        const row = worksheet.getRow(equipoStartRow + idx);
-        row.values = [
-          idx + 1,
-          equipo.placa,
-          equipo.serial,
-          equipo.marca,
-          equipo.estado,
-          equipo.descripcionDano,
-          equipo.instaladoRetirado
-        ];
-        row.eachCell((cell) => {
-          cell.border = {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' }
-          };
-          cell.alignment = { vertical: 'middle', horizontal: 'center' };
-        });
-      });
-      // Agregar imágenes de firmas si existen
-      const addImageToSheet = (imageData, cell) => {
-        if (!imageData) return;
-        // Convertir base64 a Uint8Array
-        const base64Data = imageData.split(',')[1];
-        const binary = atob(base64Data);
-        const len = binary.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
-        const imageId = workbook.addImage({
-          buffer: bytes,
-          extension: 'png',
-        });
-        worksheet.addImage(imageId, cell);
-      };
-
-      // Ejemplo: agregar firmas en celdas específicas
-      addImageToSheet(firmaCliente, 'A20:B23');
-      worksheet.getCell('A24').value = 'Nombre:';
-      worksheet.getCell('B24').value = firmanteCliente.nombre || '';
-      worksheet.getCell('A25').value = 'DPI:';
-      worksheet.getCell('B25').value = firmanteCliente.dpi || '';
-
-      addImageToSheet(firmaTecnico, 'C20:D23');
-      worksheet.getCell('C24').value = 'Nombre:';
-      worksheet.getCell('D24').value = firmanteTecnico.nombre || '';
-      worksheet.getCell('C25').value = 'DPI:';
-      worksheet.getCell('D25').value = firmanteTecnico.dpi || '';
-
-      addImageToSheet(firmaAlmacenista, 'E20:F23');
-      worksheet.getCell('E24').value = 'Nombre:';
-      worksheet.getCell('F24').value = firmanteAlmacenista.nombre || '';
-      worksheet.getCell('E25').value = 'Cédula:';
-      worksheet.getCell('F25').value = firmanteAlmacenista.cedula || '';
-
-      // Reporte técnico
-      const lastRow = worksheet.rowCount + 2;
-      worksheet.mergeCells(`A${lastRow}:G${lastRow}`);
-      worksheet.getCell(`A${lastRow}`).value = 'REPORTE TÉCNICO Y/O OBSERVACIONES';
-      worksheet.getCell(`A${lastRow}`).style = subheaderStyle;
-
-      worksheet.mergeCells(`A${lastRow + 1}:G${lastRow + 3}`);
-      worksheet.getCell(`A${lastRow + 1}`).value = reporteTecnico;
-      worksheet.getCell(`A${lastRow + 1}`).alignment = { wrapText: true };
-
-      // Razón por no firmar
-      if (noFirmaCliente) {
-        worksheet.mergeCells(`A${lastRow + 5}:G${lastRow + 5}`);
-        worksheet.getCell(`A${lastRow + 5}`).value = 'NO SE FIRMÓ POR CLIENTE ¿POR QUÉ?';
-        worksheet.getCell(`A${lastRow + 5}`).style = subheaderStyle;
-
-        worksheet.mergeCells(`A${lastRow + 6}:G${lastRow + 6}`);
-        worksheet.getCell(`A${lastRow + 6}`).value = noFirmaCliente;
+      await workbook.xlsx.load(arrayBuffer);
+      // Mostrar nombres de hojas para depuración
+      const sheetNames = workbook.worksheets.map(ws => ws.name);
+      console.log('Nombres de hojas en la plantilla:', sheetNames);
+      // Usar la primera hoja disponible
+      const worksheet = workbook.worksheets[0];
+      if (!worksheet) {
+        throw new Error('No se encontró ninguna hoja en la plantilla.');
       }
 
-      // Ajustar anchos de columnas
-      worksheet.columns = [
-        { width: 5 },  // No
-        { width: 15 }, // Placa
-        { width: 20 }, // Serial
-        { width: 15 }, // Marca
-        { width: 15 }, // Estado
-        { width: 30 }, // Descripción
-        { width: 20 }  // Instalado/Retirado
-      ];
+      // Llenar datos en celdas específicas (ajusta según tu plantilla)
+      // Ajusta las celdas según el formato visual de tu plantilla
+      // Encabezado principal
+      worksheet.getCell('C12').value = datosVisita.sidTT; // SID-TT
+      worksheet.getCell('K12').value = datosVisita.ciudad; // CIUDAD
+      worksheet.getCell('W12').value = datosVisita.fechaVisita; // FECHA DE VISITA
+      worksheet.getCell('Z13').value = datosVisita.contratista; // CONTRATISTA
+      worksheet.getCell('H13').value = datosVisita.horaEntrada; // HORA ENTRADA
+      worksheet.getCell('R13').value = datosVisita.horaSalida; // HORA SALIDA
 
-      // Generar el buffer del Excel
+      // Información del cliente
+      worksheet.getCell('E16').value = datosCliente.nombre; // NOMBRE
+      worksheet.getCell('X16').value = datosCliente.sede; // SEDE
+      worksheet.getCell('E17').value = datosCliente.direccion; // DIRECCIÓN
+      worksheet.getCell('X17').value = datosCliente.telefono; // TELÉFONO
+      worksheet.getCell('E18').value = datosCliente.contacto; // CONTACTO
+
+      // Equipos (ajusta el inicio de fila según tu plantilla)
+      let equipoStartRow = 22; // Fila donde inicia la tabla de equipos
+      equipos.forEach((equipo, idx) => {
+        worksheet.getCell(`C${equipoStartRow + idx}`).value = equipo.placa; // Placa
+        worksheet.getCell(`G${equipoStartRow + idx}`).value = equipo.serial; // Serial
+        worksheet.getCell(`J${equipoStartRow + idx}`).value = equipo.marca; // Marca
+        worksheet.getCell(`N${equipoStartRow + idx}`).value = equipo.estado; // Estado
+        worksheet.getCell(`S${equipoStartRow + idx}`).value = equipo.descripcionDano; // Descripción daño
+        worksheet.getCell(`AB${equipoStartRow + idx}`).value = equipo.instaladoRetirado; // Instalado/Retirado
+      });
+
+      // Reporte técnico y parte de abajo
+      worksheet.getCell('B34').value = reporteTecnico; // Ajusta la celda según tu plantilla
+
+      // Firmas y datos de firmantes (ajusta según tu plantilla)
+  // Coloca el nombre y DPI a la par del texto original en la celda
+  worksheet.getCell('F47').value = (worksheet.getCell('F47').value || '') + ' ' + (firmanteCliente?.nombre || '');
+  worksheet.getCell('F48').value = (worksheet.getCell('F48').value || '') + ' ' + (firmanteCliente?.dpi || '');
+  worksheet.getCell('K47').value = (worksheet.getCell('K47').value || '') + ' ' + (firmanteTecnico?.nombre || '');
+  worksheet.getCell('K48').value = (worksheet.getCell('K48').value || '') + ' ' + (firmanteTecnico?.dpi || '');
+  worksheet.getCell('AE47').value = (worksheet.getCell('AE47').value || '') + ' ' + (firmanteAlmacenista?.nombre || '');
+  worksheet.getCell('AE48').value = (worksheet.getCell('AE48').value || '') + ' ' + (firmanteAlmacenista?.cedula || '');
+
+      // Razón por no firmar
+      worksheet.getCell('V43').value = noFirmaCliente || '';
+
+      // Descargar el archivo
       const buffer = await workbook.xlsx.writeBuffer();
-      
-      // Crear blob y descargar
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(blob, `formato-visita-${datosVisita.sidTT || new Date().getTime()}.xlsx`);
-      
+      saveAs(blob, `formato-certificado-${datosVisita.sidTT || new Date().getTime()}.xlsx`);
       return true;
     } catch (error) {
       console.error('Error generando Excel:', error);
