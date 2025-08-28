@@ -245,23 +245,23 @@ const FormatoControlVisita = () => {
       };
 
       // Ejemplo: agregar firmas en celdas específicas
-  addImageToSheet(firmaCliente, 'A20:B23');
-  worksheet.getCell('A24').value = 'Nombre:';
-  worksheet.getCell('B24').value = firmanteCliente.nombre || '';
-  worksheet.getCell('A25').value = 'DPI:';
-  worksheet.getCell('B25').value = firmanteCliente.dpi || '';
+      addImageToSheet(firmaCliente, 'A20:B23');
+      worksheet.getCell('A24').value = 'Nombre:';
+      worksheet.getCell('B24').value = firmanteCliente.nombre || '';
+      worksheet.getCell('A25').value = 'DPI:';
+      worksheet.getCell('B25').value = firmanteCliente.dpi || '';
 
-  addImageToSheet(firmaTecnico, 'C20:D23');
-  worksheet.getCell('C24').value = 'Nombre:';
-  worksheet.getCell('D24').value = firmanteTecnico.nombre || '';
-  worksheet.getCell('C25').value = 'DPI:';
-  worksheet.getCell('D25').value = firmanteTecnico.dpi || '';
+      addImageToSheet(firmaTecnico, 'C20:D23');
+      worksheet.getCell('C24').value = 'Nombre:';
+      worksheet.getCell('D24').value = firmanteTecnico.nombre || '';
+      worksheet.getCell('C25').value = 'DPI:';
+      worksheet.getCell('D25').value = firmanteTecnico.dpi || '';
 
-  addImageToSheet(firmaAlmacenista, 'E20:F23');
-  worksheet.getCell('E24').value = 'Nombre:';
-  worksheet.getCell('F24').value = firmanteAlmacenista.nombre || '';
-  worksheet.getCell('E25').value = 'Cédula:';
-  worksheet.getCell('F25').value = firmanteAlmacenista.cedula || '';
+      addImageToSheet(firmaAlmacenista, 'E20:F23');
+      worksheet.getCell('E24').value = 'Nombre:';
+      worksheet.getCell('F24').value = firmanteAlmacenista.nombre || '';
+      worksheet.getCell('E25').value = 'Cédula:';
+      worksheet.getCell('F25').value = firmanteAlmacenista.cedula || '';
 
       // Reporte técnico
       const lastRow = worksheet.rowCount + 2;
