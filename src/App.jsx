@@ -8,15 +8,87 @@ import { InformeEquipo } from './Informe/InformeEquipo';
 import { Firmas } from './Informe/Firmas';
 
 const FormatoControlVisita = () => {
+
+  // Estados para reporte técnico
+  const [reporteTecnico, setReporteTecnico] = useState('');
+  
+
+  // Manejar cambios en equipos
+  const handleEquipoChange = (index, field, value) => {
+      const newEquipos = [...equipos];
+      newEquipos[index] = { ...newEquipos[index], [field]: value };
+      setEquipos(newEquipos);
+  };
+
+  // Función para agregar más filas de equipos
+  const agregarEquipo = () => {
+      setEquipos([...equipos, { 
+      no: equipos.length + 1, 
+      placa: '', 
+      serial: '', 
+      marca: '', 
+      estado: '', 
+      descripcionDano: '', 
+      instaladoRetirado: '' 
+      }]);
+  };
+
+  // Función para eliminar la última fila de equipos
+  const eliminarEquipo = () => {
+      if (equipos.length > 1) {
+      setEquipos(equipos.slice(0, -1));
+      }
+  };
+
+  // Estados para las firmas (imágenes)
+  const [firmaCliente, setFirmaCliente] = useState(null);
+  const [firmaTecnico, setFirmaTecnico] = useState(null);
+  const [firmaAlmacenista, setFirmaAlmacenista] = useState(null);
+
+  const [noFirmaCliente, setNoFirmaCliente] = useState('');
+
+  // Estados para información de firmantes
+  const [firmanteCliente, setFirmanteCliente] = useState({ nombre: '', dpi: '' });
+  const [firmanteTecnico, setFirmanteTecnico] = useState({ nombre: '', dpi: '' });
+  const [firmanteAlmacenista, setFirmanteAlmacenista] = useState({ nombre: '', cedula: '' });
+
+
   // Estado para carga y mensajes
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState({ texto: '', tipo: '' });
+
+  // Estados para la información de la visita
+  const [datosVisita, setDatosVisita] = useState({
+      sidTT: '',
+      ciudad: '',
+      fechaVisita: '',
+      contratista: '',
+      horaEntrada: '',
+      horaSalida: ''
+  });
+
+  // Estados para los equipos
+  const [equipos, setEquipos] = useState([
+      { no: 1, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' },
+      { no: 2, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' },
+      { no: 3, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' },
+      { no: 4, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' },
+      { no: 5, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' }
+  ]);
 
   // Manejar cambios en los inputs
   const handleInputChange = (setter) => (e) => {
     const { name, value } = e.target;
     setter(prev => ({ ...prev, [name]: value }));
   };
+
+  const [datosCliente, setDatosCliente] = useState({
+    nombre: '',
+    sede: '',
+    direccion: '',
+    telefono: '',
+    contacto: ''
+  }); 
 
   // Función para mostrar mensajes
   const mostrarMensaje = (texto, tipo = 'success') => {
@@ -118,14 +190,24 @@ const FormatoControlVisita = () => {
 
       // Encabezados de la tabla de equipos
       const equipoHeaders = ['No', 'Placa', 'Serial', 'Marca', 'Estado', 'Descripción del Daño', 'Instalado/Retirado'];
-      worksheet.addRow(equipoHeaders);
+      worksheet.getRow(13).values = equipoHeaders;
       worksheet.getRow(13).eachCell((cell) => {
         cell.style = headerStyle;
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
       });
 
-      // Datos de equipos
-      equipos.filter(e => e.placa || e.serial || e.marca).forEach((equipo, idx) => {
-        worksheet.addRow([
+      // Mostrar todos los equipos, aunque estén vacíos
+      // Escribir los equipos en filas fijas para evitar que se desplacen
+      let equipoStartRow = 14;
+      equipos.forEach((equipo, idx) => {
+        const row = worksheet.getRow(equipoStartRow + idx);
+        row.values = [
           idx + 1,
           equipo.placa,
           equipo.serial,
@@ -133,8 +215,53 @@ const FormatoControlVisita = () => {
           equipo.estado,
           equipo.descripcionDano,
           equipo.instaladoRetirado
-        ]);
+        ];
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: 'thin' },
+            left: { style: 'thin' },
+            bottom: { style: 'thin' },
+            right: { style: 'thin' }
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        });
       });
+      // Agregar imágenes de firmas si existen
+      const addImageToSheet = (imageData, cell) => {
+        if (!imageData) return;
+        // Convertir base64 a Uint8Array
+        const base64Data = imageData.split(',')[1];
+        const binary = atob(base64Data);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        const imageId = workbook.addImage({
+          buffer: bytes,
+          extension: 'png',
+        });
+        worksheet.addImage(imageId, cell);
+      };
+
+      // Ejemplo: agregar firmas en celdas específicas
+  addImageToSheet(firmaCliente, 'A20:B23');
+  worksheet.getCell('A24').value = 'Nombre:';
+  worksheet.getCell('B24').value = firmanteCliente.nombre || '';
+  worksheet.getCell('A25').value = 'DPI:';
+  worksheet.getCell('B25').value = firmanteCliente.dpi || '';
+
+  addImageToSheet(firmaTecnico, 'C20:D23');
+  worksheet.getCell('C24').value = 'Nombre:';
+  worksheet.getCell('D24').value = firmanteTecnico.nombre || '';
+  worksheet.getCell('C25').value = 'DPI:';
+  worksheet.getCell('D25').value = firmanteTecnico.dpi || '';
+
+  addImageToSheet(firmaAlmacenista, 'E20:F23');
+  worksheet.getCell('E24').value = 'Nombre:';
+  worksheet.getCell('F24').value = firmanteAlmacenista.nombre || '';
+  worksheet.getCell('E25').value = 'Cédula:';
+  worksheet.getCell('F25').value = firmanteAlmacenista.cedula || '';
 
       // Reporte técnico
       const lastRow = worksheet.rowCount + 2;
@@ -257,13 +384,27 @@ const FormatoControlVisita = () => {
         FORMATO DE CONTROL DE VISITA Y ACTA DE ENTREGA DE SERVICIO
       </h1>
 
-      <InformacionVisita/>
+  <InformacionVisita datosVisita={datosVisita} setDatosVisita={setDatosVisita} />
+  <InformacionCliente datosCliente={datosCliente} setDatosCliente={setDatosCliente} />
       
-      <InformacionCliente/>
-      
-      <InformeEquipo/>
+        <InformeEquipo 
+          equipos={equipos} 
+          setEquipos={setEquipos} 
+          reporteTecnico={reporteTecnico} 
+          setReporteTecnico={setReporteTecnico} 
+          agregarEquipo={agregarEquipo} 
+          eliminarEquipo={eliminarEquipo} 
+        />
 
-      <Firmas/>
+        <Firmas 
+          firmaCliente={firmaCliente} setFirmaCliente={setFirmaCliente}
+          firmaTecnico={firmaTecnico} setFirmaTecnico={setFirmaTecnico}
+          firmaAlmacenista={firmaAlmacenista} setFirmaAlmacenista={setFirmaAlmacenista}
+          noFirmaCliente={noFirmaCliente} setNoFirmaCliente={setNoFirmaCliente}
+          firmanteCliente={firmanteCliente} setFirmanteCliente={setFirmanteCliente}
+          firmanteTecnico={firmanteTecnico} setFirmanteTecnico={setFirmanteTecnico}
+          firmanteAlmacenista={firmanteAlmacenista} setFirmanteAlmacenista={setFirmanteAlmacenista}
+        />
 
       {/* Botones de acción */}
       <div className="flex justify-center mt-6 space-x-4">

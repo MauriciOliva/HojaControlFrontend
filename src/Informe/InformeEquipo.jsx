@@ -1,44 +1,11 @@
-import React, { useState } from 'react'
+import React from 'react'
 
-export const InformeEquipo = () => {
-    // Estados para los equipos
-    const [equipos, setEquipos] = useState([
-        { no: 1, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' },
-        { no: 2, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' },
-        { no: 3, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' },
-        { no: 4, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' },
-        { no: 5, placa: '', serial: '', marca: '', estado: '', descripcionDano: '', instaladoRetirado: '' }
-    ]);
-
-    // Estados para reporte técnico
-    const [reporteTecnico, setReporteTecnico] = useState('');
-    
-
+export const InformeEquipo = ({ equipos, setEquipos, reporteTecnico, setReporteTecnico, agregarEquipo, eliminarEquipo }) => {
     // Manejar cambios en equipos
     const handleEquipoChange = (index, field, value) => {
         const newEquipos = [...equipos];
         newEquipos[index] = { ...newEquipos[index], [field]: value };
         setEquipos(newEquipos);
-    };
-
-    // Función para agregar más filas de equipos
-    const agregarEquipo = () => {
-        setEquipos([...equipos, { 
-        no: equipos.length + 1, 
-        placa: '', 
-        serial: '', 
-        marca: '', 
-        estado: '', 
-        descripcionDano: '', 
-        instaladoRetirado: '' 
-        }]);
-    };
-
-    // Función para eliminar la última fila de equipos
-    const eliminarEquipo = () => {
-        if (equipos.length > 1) {
-        setEquipos(equipos.slice(0, -1));
-        }
     };
 
     return (

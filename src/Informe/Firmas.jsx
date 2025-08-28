@@ -1,30 +1,17 @@
-import React, { useState } from 'react'
+import React from 'react'
 
-export const Firmas = () => {
     // Manejar subida de imágenes
+export const Firmas = ({ firmaCliente, setFirmaCliente, firmaTecnico, setFirmaTecnico, firmaAlmacenista, setFirmaAlmacenista, noFirmaCliente, setNoFirmaCliente, firmanteCliente, setFirmanteCliente, firmanteTecnico, setFirmanteTecnico, firmanteAlmacenista, setFirmanteAlmacenista }) => {
     const handleImageUpload = (setImage) => (e) => {
         const file = e.target.files[0];
         if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setImage(reader.result);
-        };
-        reader.readAsDataURL(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImage(reader.result);
+            };
+            reader.readAsDataURL(file);
         }
     };
-
-    // Estados para las firmas (imágenes)
-    const [firmaCliente, setFirmaCliente] = useState(null);
-    const [firmaTecnico, setFirmaTecnico] = useState(null);
-    const [firmaAlmacenista, setFirmaAlmacenista] = useState(null);
-
-    const [noFirmaCliente, setNoFirmaCliente] = useState('');
-
-    // Estados para información de firmantes
-    const [firmanteCliente, setFirmanteCliente] = useState({ nombre: '', dpi: '' });
-    const [firmanteTecnico, setFirmanteTecnico] = useState({ nombre: '', dpi: '' });
-    const [firmanteAlmacenista, setFirmanteAlmacenista] = useState({ nombre: '', cedula: '' });
-      
     return (
         <div>
             {/* Firmas */}

@@ -1,18 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 
-export const InformacionCliente = () => {
 
-    const [datosCliente, setDatosCliente] = useState({
-        nombre: '',
-        sede: '',
-        direccion: '',
-        telefono: '',
-        contacto: ''
-    });
-
-    const handleInputChange = (setter) => (e) => {
+export const InformacionCliente = ({ datosCliente, setDatosCliente }) => {
+    const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setter(prev => ({ ...prev, [name]: value }));
+        setDatosCliente(prev => ({ ...prev, [name]: value }));
     };
 
     return (
@@ -26,7 +18,7 @@ export const InformacionCliente = () => {
                 type="text"
                 name="nombre"
                 value={datosCliente.nombre}
-                onChange={handleInputChange(setDatosCliente)}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded text-sm"
                 placeholder="Nombre completo"
                 required
@@ -38,7 +30,7 @@ export const InformacionCliente = () => {
                 type="text"
                 name="sede"
                 value={datosCliente.sede}
-                onChange={handleInputChange(setDatosCliente)}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded text-sm"
                 placeholder="Sede del cliente"
                 />
@@ -49,7 +41,7 @@ export const InformacionCliente = () => {
                 type="text"
                 name="direccion"
                 value={datosCliente.direccion}
-                onChange={handleInputChange(setDatosCliente)}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded text-sm"
                 placeholder="Dirección completa"
                 />
@@ -60,7 +52,7 @@ export const InformacionCliente = () => {
                 type="text"
                 name="telefono"
                 value={datosCliente.telefono}
-                onChange={handleInputChange(setDatosCliente)}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded text-sm"
                 placeholder="Número de teléfono"
                 />
@@ -71,7 +63,7 @@ export const InformacionCliente = () => {
                 type="text"
                 name="contacto"
                 value={datosCliente.contacto}
-                onChange={handleInputChange(setDatosCliente)}
+                onChange={handleInputChange}
                 className="w-full p-2 border border-gray-300 rounded text-sm"
                 placeholder="Persona de contacto"
                 />

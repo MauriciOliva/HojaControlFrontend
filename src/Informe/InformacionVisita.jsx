@@ -1,21 +1,11 @@
-import React, { useState } from 'react'
+import React from 'react'
 
-export const InformacionVisita = () => {
 
-    // Estados para la información de la visita
-    const [datosVisita, setDatosVisita] = useState({
-        sidTT: '',
-        ciudad: '',
-        fechaVisita: '',
-        contratista: '',
-        horaEntrada: '',
-        horaSalida: ''
-    });
-    
-    const handleInputChange = (setter) => (e) => {
-        const { name, value } = e.target;
-        setter(prev => ({ ...prev, [name]: value }));
-    };
+export const InformacionVisita = ({ datosVisita, setDatosVisita }) => {
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setDatosVisita(prev => ({ ...prev, [name]: value }));
+  };
 
   return (
     <div>
@@ -29,7 +19,7 @@ export const InformacionVisita = () => {
               type="text"
               name="sidTT"
               value={datosVisita.sidTT}
-              onChange={handleInputChange(setDatosVisita)}
+              onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded text-sm"
               placeholder="Ingrese SID-TT"
               required
@@ -41,7 +31,7 @@ export const InformacionVisita = () => {
               type="text"
               name="ciudad"
               value={datosVisita.ciudad}
-              onChange={handleInputChange(setDatosVisita)}
+              onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded text-sm"
               placeholder="Nombre de la ciudad"
               required
@@ -53,7 +43,7 @@ export const InformacionVisita = () => {
               type="date"
               name="fechaVisita"
               value={datosVisita.fechaVisita}
-              onChange={handleInputChange(setDatosVisita)}
+              onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded text-sm"
               required
             />
@@ -64,7 +54,7 @@ export const InformacionVisita = () => {
               type="text"
               name="contratista"
               value={datosVisita.contratista}
-              onChange={handleInputChange(setDatosVisita)}
+              onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded text-sm"
               placeholder="Nombre del contratista"
             />
@@ -75,7 +65,7 @@ export const InformacionVisita = () => {
               type="time"
               name="horaEntrada"
               value={datosVisita.horaEntrada}
-              onChange={handleInputChange(setDatosVisita)}
+              onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded text-sm"
             />
           </div>
@@ -85,7 +75,7 @@ export const InformacionVisita = () => {
               type="time"
               name="horaSalida"
               value={datosVisita.horaSalida}
-              onChange={handleInputChange(setDatosVisita)}
+              onChange={handleInputChange}
               className="w-full p-2 border border-gray-300 rounded text-sm"
             />
           </div>
