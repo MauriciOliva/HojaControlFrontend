@@ -7,36 +7,46 @@ export const Firmas = ({ firmaCliente, setFirmaCliente, firmaTecnico, setFirmaTe
     const sigCanvasTecnico = useRef();
     const sigCanvasAlmacenista = useRef();
 
+    const [mensajeFirmaCliente, setMensajeFirmaCliente] = React.useState('');
+    const [mensajeFirmaTecnico, setMensajeFirmaTecnico] = React.useState('');
+    const [mensajeFirmaAlmacenista, setMensajeFirmaAlmacenista] = React.useState('');
+
     const clearFirmaCliente = () => {
         sigCanvasCliente.current.clear();
         setFirmaCliente(null);
+        setMensajeFirmaCliente('');
     };
     const saveFirmaCliente = () => {
         if (!sigCanvasCliente.current.isEmpty()) {
-            const dataUrl = sigCanvasCliente.current.getTrimmedCanvas().toDataURL('image/png');
+            const dataUrl = sigCanvasCliente.current.getCanvas().toDataURL('image/png');
             setFirmaCliente(dataUrl);
+            setMensajeFirmaCliente('Firma guardada');
         }
     };
 
     const clearFirmaTecnico = () => {
         sigCanvasTecnico.current.clear();
         setFirmaTecnico(null);
+        setMensajeFirmaTecnico('');
     };
     const saveFirmaTecnico = () => {
         if (!sigCanvasTecnico.current.isEmpty()) {
-            const dataUrl = sigCanvasTecnico.current.getTrimmedCanvas().toDataURL('image/png');
+            const dataUrl = sigCanvasTecnico.current.getCanvas().toDataURL('image/png');
             setFirmaTecnico(dataUrl);
+            setMensajeFirmaTecnico('Firma guardada');
         }
     };
 
     const clearFirmaAlmacenista = () => {
         sigCanvasAlmacenista.current.clear();
         setFirmaAlmacenista(null);
+        setMensajeFirmaAlmacenista('');
     };
     const saveFirmaAlmacenista = () => {
         if (!sigCanvasAlmacenista.current.isEmpty()) {
-            const dataUrl = sigCanvasAlmacenista.current.getTrimmedCanvas().toDataURL('image/png');
+            const dataUrl = sigCanvasAlmacenista.current.getCanvas().toDataURL('image/png');
             setFirmaAlmacenista(dataUrl);
+            setMensajeFirmaAlmacenista('Firma guardada');
         }
     };
     const handleImageUpload = (setImage) => (e) => {
@@ -68,8 +78,8 @@ export const Firmas = ({ firmaCliente, setFirmaCliente, firmaTecnico, setFirmaTe
                             <button type="button" onClick={saveFirmaCliente} className="bg-blue-500 text-white px-2 py-1 rounded">Guardar</button>
                             <button type="button" onClick={clearFirmaCliente} className="bg-gray-400 text-white px-2 py-1 rounded">Limpiar</button>
                         </div>
-                        {firmaCliente && (
-                            <img src={firmaCliente} alt="Firma del cliente" className="max-h-28 max-w-full mt-2" />
+                        {mensajeFirmaCliente && (
+                            <div className="text-green-600 text-sm mt-2">{mensajeFirmaCliente}</div>
                         )}
                     </div>
                     <input
@@ -101,8 +111,8 @@ export const Firmas = ({ firmaCliente, setFirmaCliente, firmaTecnico, setFirmaTe
                             <button type="button" onClick={saveFirmaTecnico} className="bg-blue-500 text-white px-2 py-1 rounded">Guardar</button>
                             <button type="button" onClick={clearFirmaTecnico} className="bg-gray-400 text-white px-2 py-1 rounded">Limpiar</button>
                         </div>
-                        {firmaTecnico && (
-                            <img src={firmaTecnico} alt="Firma del técnico" className="max-h-28 max-w-full mt-2" />
+                        {mensajeFirmaTecnico && (
+                            <div className="text-green-600 text-sm mt-2">{mensajeFirmaTecnico}</div>
                         )}
                     </div>
                     <input
@@ -134,8 +144,8 @@ export const Firmas = ({ firmaCliente, setFirmaCliente, firmaTecnico, setFirmaTe
                             <button type="button" onClick={saveFirmaAlmacenista} className="bg-blue-500 text-white px-2 py-1 rounded">Guardar</button>
                             <button type="button" onClick={clearFirmaAlmacenista} className="bg-gray-400 text-white px-2 py-1 rounded">Limpiar</button>
                         </div>
-                        {firmaAlmacenista && (
-                            <img src={firmaAlmacenista} alt="Firma del almacenista" className="max-h-28 max-w-full mt-2" />
+                        {mensajeFirmaAlmacenista && (
+                            <div className="text-green-600 text-sm mt-2">{mensajeFirmaAlmacenista}</div>
                         )}
                     </div>
                     <input
