@@ -126,8 +126,6 @@ const FormatoControlVisita = () => {
       }
 
       // Llenar datos en celdas específicas (ajusta según tu plantilla)
-      // Ajusta las celdas según el formato visual de tu plantilla
-      // Encabezado principal
       worksheet.getCell('C12').value = datosVisita.sidTT; // SID-TT
       worksheet.getCell('K12').value = datosVisita.ciudad; // CIUDAD
       worksheet.getCell('W12').value = datosVisita.fechaVisita; // FECHA DE VISITA
@@ -157,16 +155,60 @@ const FormatoControlVisita = () => {
       worksheet.getCell('B34').value = reporteTecnico; // Ajusta la celda según tu plantilla
 
       // Firmas y datos de firmantes (ajusta según tu plantilla)
-  // Coloca el nombre y DPI a la par del texto original en la celda
-  worksheet.getCell('F47').value = (worksheet.getCell('F47').value || '') + ' ' + (firmanteCliente?.nombre || '');
-  worksheet.getCell('F48').value = (worksheet.getCell('F48').value || '') + ' ' + (firmanteCliente?.dpi || '');
-  worksheet.getCell('K47').value = (worksheet.getCell('K47').value || '') + ' ' + (firmanteTecnico?.nombre || '');
-  worksheet.getCell('K48').value = (worksheet.getCell('K48').value || '') + ' ' + (firmanteTecnico?.dpi || '');
-  worksheet.getCell('AE47').value = (worksheet.getCell('AE47').value || '') + ' ' + (firmanteAlmacenista?.nombre || '');
-  worksheet.getCell('AE48').value = (worksheet.getCell('AE48').value || '') + ' ' + (firmanteAlmacenista?.cedula || '');
+      worksheet.getCell('F47').value = (worksheet.getCell('F47').value || '') + ' ' + (firmanteCliente?.nombre || '');
+      worksheet.getCell('F48').value = (worksheet.getCell('F48').value || '') + ' ' + (firmanteCliente?.dpi || '');
+      worksheet.getCell('K47').value = (worksheet.getCell('K47').value || '') + ' ' + (firmanteTecnico?.nombre || '');
+      worksheet.getCell('K48').value = (worksheet.getCell('K48').value || '') + ' ' + (firmanteTecnico?.dpi || '');
+      worksheet.getCell('AE47').value = (worksheet.getCell('AE47').value || '') + ' ' + (firmanteAlmacenista?.nombre || '');
+      worksheet.getCell('AE48').value = (worksheet.getCell('AE48').value || '') + ' ' + (firmanteAlmacenista?.cedula || '');
 
       // Razón por no firmar
       worksheet.getCell('V43').value = noFirmaCliente || '';
+
+      // Agregar firmas como imágenes en el Excel
+      // Helper para convertir base64 a buffer
+      function base64ToBuffer(dataUrl) {
+        if (!dataUrl) return null;
+        const base64 = dataUrl.split(',')[1];
+        return Uint8Array.from(atob(base64), c => c.charCodeAt(0));
+      }
+
+      // Insertar imágenes en las celdas B43, I43 y AB43
+      // B = col 1, I = col 9, AB = col 28 (ExcelJS usa base 0)
+      // Tamaño más grande y centrado en el espacio de la celda
+      const firmaWidth = 260;
+      const firmaHeight = 80;
+      // Para centrar, desplazamos el punto de inicio medio col a la derecha
+      if (firmaCliente) {
+        const imageId = workbook.addImage({
+          buffer: base64ToBuffer(firmaCliente),
+          extension: 'png',
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: 1.2, row: 42.1 }, // B43 centrado
+          ext: { width: firmaWidth, height: firmaHeight },
+        });
+      }
+      if (firmaTecnico) {
+        const imageId = workbook.addImage({
+          buffer: base64ToBuffer(firmaTecnico),
+          extension: 'png',
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: 8.2, row: 42.1 }, // I43 centrado
+          ext: { width: firmaWidth, height: firmaHeight },
+        });
+      }
+      if (firmaAlmacenista) {
+        const imageId = workbook.addImage({
+          buffer: base64ToBuffer(firmaAlmacenista),
+          extension: 'png',
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: 27.2, row: 42.1 }, // AB43 centrado
+          ext: { width: firmaWidth, height: firmaHeight },
+        });
+      }
 
       // Descargar el archivo
       const buffer = await workbook.xlsx.writeBuffer();
