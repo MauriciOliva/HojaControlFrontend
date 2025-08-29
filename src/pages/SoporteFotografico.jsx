@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import IFX from '../assets/image.png';
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export const SoporteFotografico = () => {
+  const navigate = useNavigate()
   // Guardar referencias a los archivos originales
   const [imageFiles, setImageFiles] = useState({});
   const [images, setImages] = useState({
@@ -82,34 +84,95 @@ export const SoporteFotografico = () => {
     </div>
   );
 
-  // Mapeo de campos a coordenadas de celda en el Excel
-  const getCellPosition = (field) => {
+  // Mapeo de campos a rangos de celdas en el Excel
+  const getCellRange = (field) => {
     const positions = {
-      fachada: { col: 1, row: 20 }, // Columna B, Fila 20
-      equiposRack: { col: 6, row: 20 }, // Columna G, Fila 20
-      puntosElectricos: { col: 11, row: 20 }, // Columna L, Fila 20
-      raisecomInstalado: { col: 1, row: 40 },
-      raisecomEnergia: { col: 6, row: 40 },
-      raisecomRack: { col: 11, row: 40 },
-      raisecomSerial: { col: 1, row: 60 },
-      raisecomMarquillado: { col: 6, row: 60 },
-      raisecomConexiones: { col: 11, row: 60 },
-      firewallInstalado: { col: 1, row: 80 },
-      firewallEnergia: { col: 6, row: 80 },
-      firewallRack: { col: 11, row: 80 },
-      firewallSerial: { col: 1, row: 100 },
-      firewallMarquillado: { col: 6, row: 100 },
-      firewallConexiones: { col: 11, row: 100 },
-      conexionLan: { col: 1, row: 120 },
-      conexionesWan: { col: 6, row: 120 },
-      actaEntrega: { col: 11, row: 120 },
-      speedTest: { col: 1, row: 140 },
-      pingInternet: { col: 6, row: 140 },
-      pingGateway: { col: 11, row: 140 },
-      trazaInternet: { col: 1, row: 160 },
+      fachada: "B20:J31",
+      equiposRack: "K20:W31",
+      puntosElectricos: "X19:AH32",
+      raisecomInstalado: "B38:J51",
+      raisecomEnergia: "K38:W51",
+      raisecomRack: "X38:AH51",
+      raisecomSerial: "B53:J67",
+      raisecomMarquillado: "K53:W67",
+      raisecomConexiones: "X53:AH67",
+      firewallInstalado: "B69:J83",
+      firewallEnergia: "K69:W83",
+      firewallRack: "X69:AH83",
+      firewallSerial: "B85:J99",
+      firewallMarquillado: "K85:W99",
+      firewallConexiones: "X85:AH99",
+      conexionLan: "B101:J115",
+      conexionesWan: "K101:W115",
+      actaEntrega: "X101:AH115",
+      speedTest: "B117:J131",
+      pingInternet: "K117:W131",
+      pingGateway: "X117:AH131",
+      trazaInternet: "B133:J147",
     };
     
-    return positions[field] || { col: 1, row: 180 };
+    return positions[field] || "B180:J195";
+  };
+
+  // Función mejorada para generar Excel
+  const generateExcel = async () => {
+    try {
+      // Cargar la plantilla desde public
+      const response = await fetch('/CondicionesCliente.xlsx');
+      if (!response.ok) {
+        throw new Error(`Error al cargar plantilla: ${response.status}`);
+      }
+      
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.worksheets[0];
+
+      // Procesar cada imagen
+      const imageInsertionPromises = Object.entries(imageFiles).map(async ([field, file]) => {
+        if (!file) return;
+        
+        try {
+          const buffer = await file.arrayBuffer();
+          
+          // Determinar la extensión correcta
+          let extension = 'png';
+          if (file.type === 'image/jpeg' || file.type === 'image/jpg') {
+            extension = 'jpeg';
+          }
+          
+          // Agregar imagen al Excel
+          const imageId = workbook.addImage({
+            buffer: buffer,
+            extension: extension,
+          });
+          
+          // Obtener el rango de celdas para esta imagen
+          const cellRange = getCellRange(field);
+          
+          // Insertar la imagen en el rango calculado
+          worksheet.addImage(imageId, cellRange);
+          
+          console.log(`Imagen ${field} insertada en rango: ${cellRange}`);
+        } catch (error) {
+          console.error(`Error procesando imagen ${field}:`, error);
+          throw error;
+        }
+      });
+
+      // Esperar a que todas las imágenes se procesen
+      await Promise.all(imageInsertionPromises);
+
+      // Guardar el archivo
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `soporte-fotografico-${new Date().toISOString().slice(0,10)}.xlsx`);
+      
+      alert('Excel generado correctamente con las imágenes');
+    } catch (error) {
+      console.error('Error al generar el Excel:', error);
+      alert('Error al generar el Excel. Verifica la consola para más detalles.');
+    }
   };
 
   return (
@@ -302,66 +365,15 @@ export const SoporteFotografico = () => {
 
       {/* Botón de enviar */}
       <div className="flex justify-center mt-8 space-x-4">
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Enviar Formulario
-        </button>
+        <button 
+          onClick={() => navigate('/')}
+          className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded shadow-md transition duration-200"
+        >
+          Informe de Control
+        </button>
         <button
           className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-          onClick={async () => {
-            try {
-              // Cargar la plantilla desde public
-              const response = await fetch('/CondicionesCliente.xlsx');
-              const arrayBuffer = await response.arrayBuffer();
-              const workbook = new ExcelJS.Workbook();
-              await workbook.xlsx.load(arrayBuffer);
-              const worksheet = workbook.worksheets[0];
-
-              // Procesar cada imagen
-              for (const [field, file] of Object.entries(imageFiles)) {
-                if (file) {
-                  const position = getCellPosition(field);
-                  
-                  // Convertir a base64
-                  const base64 = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      const result = reader.result;
-                      const base64Data = result.split(',')[1];
-                      resolve(base64Data);
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                  });
-                  
-                  // Determinar la extensión
-                  let ext = file.type.split('/')[1];
-                  if (ext !== 'png' && ext !== 'jpeg' && ext !== 'jpg') ext = 'png';
-                  
-                  // Agregar imagen al Excel
-                  const imageId = workbook.addImage({
-                    base64,
-                    extension: ext,
-                  });
-                  
-                  // Insertar la imagen en la posición calculada
-                  worksheet.addImage(imageId, {
-                    tl: { col: position.col, row: position.row },
-                    br: { col: position.col + 4, row: position.row + 8 },
-                  });
-                }
-              }
-
-              // Guardar el archivo
-              const buffer = await workbook.xlsx.writeBuffer();
-              const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-              saveAs(blob, `soporte-fotografico-${Date.now()}.xlsx`);
-              
-              alert('Excel generado correctamente con las imágenes');
-            } catch (error) {
-              console.error('Error al generar el Excel:', error);
-              alert('Error al generar el Excel. Verifica la consola para más detalles.');
-            }
-          }}
+          onClick={generateExcel}
         >
           Generar Excel
         </button>
