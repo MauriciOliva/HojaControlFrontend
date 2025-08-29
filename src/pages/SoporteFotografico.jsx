@@ -87,8 +87,8 @@ export const SoporteFotografico = () => {
   // Mapeo de campos a rangos de celdas en el Excel
   const getCellRange = (field) => {
     const positions = {
-      fachada: "B20:J31",
-      equiposRack: "K20:W31",
+      fachada: "B19:J32",
+      equiposRack: "K19:W32",
       puntosElectricos: "X19:AH32",
       raisecomInstalado: "B38:J51",
       raisecomEnergia: "K38:W51",
